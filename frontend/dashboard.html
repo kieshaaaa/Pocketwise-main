@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PocketWise – Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --surface3: #1e2d42;
+      --border: #1e2d42;
+      --accent: #22d3ee;
+      --accent2: #818cf8;
+      --green: #4ade80;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --text: #f1f5f9;
+      --muted: #64748b;
+      --muted2: #94a3b8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 50;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.3px;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    nav {
+      flex: 1;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      color: var(--muted2);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      transition: all .2s;
+      cursor: pointer;
+    }
+
+    .nav-link:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-link.active {
+      background: rgba(34, 211, 238, .1);
+      color: var(--accent);
+    }
+
+    .nav-link .icon {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .user-pill {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .user-pill:hover {
+      background: var(--surface3);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0a0e1a;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Main */
+    .main {
+      margin-left: 220px;
+      padding: 32px;
+      flex: 1;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .month-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+    }
+
+    .month-btn:hover {
+      border-color: var(--accent);
+    }
+
+    #month-label {
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    /* Stat cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .stat-value.income {
+      color: var(--green);
+    }
+
+    .stat-value.expense {
+      color: var(--red);
+    }
+
+    .stat-value.balance {
+      color: var(--accent);
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Charts */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .chart-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      height: 320px;
+      /* ✅ FIX */
+      display: flex;
+      /* ✅ FIX */
+      flex-direction: column;
+    }
+
+    .chart-panel canvas {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    .panel-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    /* Transactions panel */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-sm {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0a0e1a;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .txn-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .txn-item:last-child {
+      border-bottom: none;
+    }
+
+    .txn-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .txn-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .txn-name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .txn-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .txn-amount {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .txn-amount.income {
+      color: var(--green);
+    }
+
+    .txn-amount.expense {
+      color: var(--red);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 32px 0;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 460px;
+      max-width: 95vw;
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    select option {
+      background: var(--surface2);
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      flex: 2;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0a0e1a;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-confirm:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .cp-error {
+      color: var(--red);
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+      padding: 10px 12px;
+      background: rgba(248, 113, 113, .08);
+      border-radius: 8px;
+      border: 1px solid rgba(248, 113, 113, .2);
+    }
+
+    .profile-info {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .profile-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: #0a0e1a;
+      flex-shrink: 0;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 14px;
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .toast.error {
+      border-color: var(--red);
+      color: var(--red);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">💰</div>
+        <div class="logo-text">Pocket<span>Wise</span></div>
+      </div>
+      <nav>
+        <div class="nav-link active"><span class="icon">📊</span> Dashboard</div>
+        <div class="nav-link" onclick="openModal('txn')"><span class="icon">➕</span> Add Transaction</div>
+        <a class="nav-link" href="budgets.html"><span class="icon">🎯</span> Budgets</a>
+        <a class="nav-link" href="savings.html"><span class="icon">💎</span> Savings Goals</a>
+      </nav>
+      <div class="user-pill" onclick="openModal('profile')">
+        <div class="avatar" id="user-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Loading...</div>
+          <div class="user-sub">Account settings</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="month-nav">
+          <button class="month-btn" onclick="changeMonth(-1)">←</button>
+          <div id="month-label"></div>
+          <button class="month-btn" onclick="changeMonth(1)">→</button>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="summary-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Income</div>
+          <div class="stat-value income" id="stat-income">₹0</div>
+          <div class="stat-sub">This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Expenses</div>
+          <div class="stat-value expense" id="stat-expense">₹0</div>
+          <div class="stat-sub">This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Net Balance</div>
+          <div class="stat-value balance" id="stat-balance">₹0</div>
+          <div class="stat-sub">Income − Expenses</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-panel">
+          <div class="panel-title">Spending by Category</div>
+          <canvas id="donut-chart" height="220"></canvas>
+        </div>
+        <div class="chart-panel">
+          <div class="panel-title">Income vs Expenses (6 months)</div>
+          <canvas id="bar-chart" height="220"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Recent Transactions</div>
+          <button class="btn-sm" onclick="openModal('txn')">+ Add Transaction</button>
+        </div>
+        <div id="txn-list">
+          <div class="empty">No transactions yet</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Transaction Modal -->
+  <div class="modal-overlay" id="modal-txn">
+    <div class="modal">
+      <div class="modal-title">Add Transaction</div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="txn-type">
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Amount (₹)</label><input type="number" id="txn-amount" placeholder="0.00"
+          min="0" /></div>
+      <div class="form-group"><label>Category</label><select id="txn-category"></select></div>
+      <div class="form-group"><label>Description</label><input type="text" id="txn-desc"
+          placeholder="What was this for?" /></div>
+      <div class="form-group"><label>Date</label><input type="date" id="txn-date" /></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('txn')">Cancel</button>
+        <button class="btn-confirm" onclick="addTransaction()">Add Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Settings / Change Password Modal -->
+  <div class="modal-overlay" id="modal-profile">
+    <div class="modal">
+      <div class="modal-title">Account Settings</div>
+      <div class="profile-info">
+        <div class="profile-avatar" id="profile-avatar">?</div>
+        <div>
+          <div style="font-size:16px;font-weight:600;" id="profile-name">—</div>
+          <div style="font-size:13px;color:var(--muted);" id="profile-email">—</div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <div
+        style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:16px;color:var(--muted2);letter-spacing:.5px;">
+        🔒 CHANGE PASSWORD</div>
+      <div class="form-group"><label>Current Password</label><input type="password" id="cp-current"
+          placeholder="Enter current password" autocomplete="current-password" /></div>
+      <div class="form-group"><label>New Password</label><input type="password" id="cp-new"
+          placeholder="Min 6 characters" autocomplete="new-password" /></div>
+      <div class="form-group"><label>Confirm New Password</label><input type="password" id="cp-confirm"
+          placeholder="Repeat new password" autocomplete="new-password" /></div>
+      <div class="cp-error" id="cp-error"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('profile')">Close</button>
+        <button class="btn-confirm" id="cp-btn" onclick="changePassword()">Update Password</button>
+      </div>
+      <div style="margin-top:20px;text-align:center;border-top:1px solid var(--border);padding-top:16px;">
+        <button onclick="logout()"
+          style="background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;">🚪 Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'https://pocketwise-production.up.railway.app/api';
+    const token = localStorage.getItem('pw_token');
+    const user = JSON.parse(localStorage.getItem('pw_user') || '{}');
+    if (!token) window.location.href = 'index.html';
+
+    document.getElementById('sidebar-name').textContent = user.name || 'User';
+    document.getElementById('user-avatar').textContent = (user.name || 'U')[0].toUpperCase();
+    document.getElementById('profile-avatar').textContent = (user.name || 'U')[0].toUpperCase();
+    document.getElementById('profile-name').textContent = user.name || '—';
+    document.getElementById('profile-email').textContent = user.email || '—';
+
+    let currentDate = new Date(), donutChart = null, barChart = null;
+    const fmt = n => '₹' + parseFloat(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0 });
+    const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = 'toast ' + type + ' show';
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    async function apiFetch(url, opts = {}) {
+      try {
+        const res = await fetch(API + url, { ...opts, headers: headers() });
+        if (res.status === 401) { logout(); return null; }
+        if (!res.ok) { const e = await res.json().catch(() => ({})); return e; }
+        return res.json();
+      } catch (e) {
+        console.error('Network error:', url, e);
+        return null;
+      }
+    }
+
+    function updateMonthLabel() {
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      document.getElementById('month-label').textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+    }
+    function changeMonth(dir) { currentDate.setMonth(currentDate.getMonth() + dir); updateMonthLabel(); loadAll(); }
+
+    // ── Summary ──
+    async function loadSummary() {
+      const d = await apiFetch(`/transactions/summary?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`);
+      if (!d) return;
+      document.getElementById('stat-income').textContent = fmt(d.income);
+      document.getElementById('stat-expense').textContent = fmt(d.expense);
+      const bal = document.getElementById('stat-balance');
+      bal.textContent = fmt(d.balance);
+      bal.style.color = (parseFloat(d.balance) >= 0) ? 'var(--green)' : 'var(--red)';
+    }
+
+    // ── Transactions list ──
+    async function loadTransactions() {
+      const d = await apiFetch(`/transactions?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}&limit=10`);
+      const el = document.getElementById('txn-list');
+      if (!d || !d.transactions) { el.innerHTML = '<div class="empty">Could not load transactions</div>'; return; }
+      if (!d.transactions.length) { el.innerHTML = '<div class="empty">No transactions this month</div>'; return; }
+      el.innerHTML = d.transactions.map(t => `
+        <div class="txn-item">
+          <div class="txn-icon">${t.icon || (t.type === 'income' ? '💚' : '🔴')}</div>
+          <div class="txn-info">
+            <div class="txn-name">${t.description || t.category_name || 'Transaction'}</div>
+            <div class="txn-meta">${t.category_name || 'Uncategorized'} · ${new Date(t.transaction_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
+          </div>
+          <div class="txn-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}</div>
+        </div>`).join('');
+    }
+
+    // ── Donut chart (spending by category) ──
+    async function loadDonutChart() {
+      const d = await apiFetch(`/transactions?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}&limit=200`);
+      if (!d || !d.transactions) return;
+      const expenses = d.transactions.filter(t => t.type === 'expense');
+      const byCat = {};
+      expenses.forEach(t => { const n = t.category_name || 'Uncategorized'; byCat[n] = (byCat[n] || 0) + parseFloat(t.amount); });
+      const labels = Object.keys(byCat), values = Object.values(byCat);
+      const palette = ['#22d3ee', '#818cf8', '#4ade80', '#fbbf24', '#f87171', '#fb923c', '#a78bfa', '#34d399', '#60a5fa', '#f472b6'];
+      const ctx = document.getElementById('donut-chart').getContext('2d');
+      if (donutChart) donutChart.destroy();
+      if (!labels.length) {
+        ctx.canvas.style.height = "100%";
+        ctx.canvas.style.width = "100%";
+
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '14px DM Sans';
+        ctx.textAlign = 'center';
+        ctx.fillText('No expenses this month', ctx.canvas.width / 2, ctx.canvas.height / 2);
+      }
+      donutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '68%',
+          plugins: {
+            legend: { position: 'right', labels: { color: '#94a3b8', font: { family: 'DM Sans', size: 12 }, padding: 12, boxWidth: 12 } },
+            tooltip: { callbacks: { label: c => ' ' + fmt(c.raw) } }
+          }
+        }
+      });
+    }
+
+    // ── Bar chart (6 months income vs expenses) ──
+    async function loadBarChart() {
+      const MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const months = [], labels = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+        months.push({ month: d.getMonth() + 1, year: d.getFullYear() });
+        labels.push(MN[d.getMonth()]);
+      }
+      const results = await Promise.all(months.map(m => apiFetch(`/transactions/summary?month=${m.month}&year=${m.year}`)));
+      const incomes = results.map(r => r ? parseFloat(r.income) || 0 : 0);
+      const expenses = results.map(r => r ? parseFloat(r.expense) || 0 : 0);
+      const ctx = document.getElementById('bar-chart').getContext('2d');
+      if (barChart) barChart.destroy();
+      barChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Income', data: incomes, backgroundColor: 'rgba(74,222,128,.7)', borderRadius: 6 },
+            { label: 'Expense', data: expenses, backgroundColor: 'rgba(248,113,113,.7)', borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { family: 'DM Sans', size: 12 }, padding: 16, boxWidth: 12 } },
+            tooltip: { callbacks: { label: c => ' ' + fmt(c.raw) } }
+          },
+          scales: {
+            x: { ticks: { color: '#64748b', font: { family: 'DM Sans' } }, grid: { color: 'rgba(255,255,255,.03)' } },
+            y: { ticks: { color: '#64748b', font: { family: 'DM Sans' }, callback: v => '₹' + v.toLocaleString('en-IN') }, grid: { color: 'rgba(255,255,255,.05)' } }
+          }
+        }
+      });
+    }
+
+    // ── Categories for modal ──
+    async function loadCategories() {
+      const d = await apiFetch('/categories');
+      if (!d || !d.categories) return;
+      const opts = d.categories.map(c => `<option value="${c.category_id}">${c.icon} ${c.name}</option>`).join('');
+      document.getElementById('txn-category').innerHTML = opts;
+    }
+
+    // ── Modal helpers ──
+    function openModal(type) {
+      if (type === 'txn') { loadCategories(); document.getElementById('txn-date').value = new Date().toISOString().split('T')[0]; }
+      document.getElementById('modal-' + type).classList.add('open');
+    }
+    function closeModal(type) {
+      document.getElementById('modal-' + type).classList.remove('open');
+      if (type === 'profile') {
+        document.getElementById('cp-error').style.display = 'none';
+        ['cp-current', 'cp-new', 'cp-confirm'].forEach(id => document.getElementById(id).value = '');
+      }
+    }
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
+
+    // ── Add transaction ──
+    async function addTransaction() {
+      const body = {
+        type: document.getElementById('txn-type').value,
+        amount: document.getElementById('txn-amount').value,
+        category_id: document.getElementById('txn-category').value,
+        description: document.getElementById('txn-desc').value,
+        transaction_date: document.getElementById('txn-date').value
+      };
+      if (!body.amount || !body.transaction_date) { showToast('Please fill amount and date', 'error'); return; }
+      const d = await apiFetch('/transactions', { method: 'POST', body: JSON.stringify(body) });
+      if (d?.message) { closeModal('txn'); showToast('✅ Transaction added!'); loadAll(); }
+      else showToast(d?.error || 'Failed to add transaction', 'error');
+    }
+
+    // ── Change password ──
+    async function changePassword() {
+      const current = document.getElementById('cp-current').value.trim();
+      const newPw = document.getElementById('cp-new').value;
+      const confirm = document.getElementById('cp-confirm').value;
+      const errEl = document.getElementById('cp-error');
+      const btn = document.getElementById('cp-btn');
+
+      errEl.style.display = 'none';
+
+      if (!current || !newPw || !confirm) {
+        errEl.textContent = '⚠ Please fill in all three fields.'; errEl.style.display = 'block'; return;
+      }
+      if (newPw.length < 6) {
+        errEl.textContent = '⚠ New password must be at least 6 characters.'; errEl.style.display = 'block'; return;
+      }
+      if (newPw !== confirm) {
+        errEl.textContent = '⚠ New passwords do not match.'; errEl.style.display = 'block'; return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Updating...';
+      const d = await apiFetch('/auth/change-password', { method: 'PUT', body: JSON.stringify({ current_password: current, new_password: newPw }) });
+      btn.disabled = false; btn.textContent = 'Update Password';
+
+      if (d?.message) {
+        showToast('✅ Password changed successfully!');
+        closeModal('profile');
+      } else {
+        errEl.textContent = '⚠ ' + (d?.error || 'Failed. Check your current password.');
+        errEl.style.display = 'block';
+      }
+    }
+
+    function logout() { localStorage.removeItem('pw_token'); localStorage.removeItem('pw_user'); window.location.href = 'index.html'; }
+
+    async function loadAll() {
+      await Promise.allSettled([loadSummary(), loadTransactions(), loadDonutChart(), loadBarChart()]);
+    }
+
+    updateMonthLabel();
+    loadAll();
+  </script>
+</body>
+
+</html>
